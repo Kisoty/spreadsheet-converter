@@ -1,1 +1,184 @@
-<?xml version="1.0" encoding="UTF-8"?><root></root>
+<?xml version="1.0" encoding="UTF-8"?>
+<spreadsheet id="1NzZp5r6O2TBJwg5cIA2yLxcGoViduwVF1yrOw9b457Y" title="MASTER Сценарий B2C: Заявка РЕНЕССАНС" autoRecalc="ON_CHANGE" locale="ru_RU" timezone="Europe/Moscow">
+  <sheet id="494785829" title="TaskCommon">
+    <row id="1">
+      <column id="A">
+        <formula/>
+        <hyperlink/>
+        <value>Таблица групп задач</value>
+      </column>
+      <column id="B">
+        <formula/>
+        <hyperlink/>
+        <value/>
+      </column>
+      <column id="C">
+        <formula/>
+        <hyperlink/>
+        <value/>
+      </column>
+      <column id="D">
+        <formula/>
+        <hyperlink/>
+        <value/>
+      </column>
+      <column id="E">
+        <formula/>
+        <hyperlink/>
+        <value/>
+      </column>
+      <column id="F">
+        <formula/>
+        <hyperlink/>
+        <value/>
+      </column>
+      <column id="G">
+        <formula/>
+        <hyperlink/>
+        <value/>
+      </column>
+      <column id="H">
+        <formula/>
+        <hyperlink/>
+        <value/>
+      </column>
+    </row>
+    <row id="2">
+      <column id="A">
+        <formula/>
+        <hyperlink/>
+        <value>ID</value>
+      </column>
+      <column id="B">
+        <formula/>
+        <hyperlink/>
+        <value>TaskType_id</value>
+      </column>
+      <column id="C">
+        <formula/>
+        <hyperlink/>
+        <value>TaskGeneral_id</value>
+      </column>
+      <column id="D">
+        <formula/>
+        <hyperlink/>
+        <value>DocTaskObject_id</value>
+      </column>
+      <column id="E">
+        <formula/>
+        <hyperlink/>
+        <value>isActive</value>
+      </column>
+      <column id="F">
+        <formula/>
+        <hyperlink/>
+        <value>Code</value>
+      </column>
+      <column id="G">
+        <formula/>
+        <hyperlink/>
+        <value>Caption</value>
+      </column>
+      <column id="H">
+        <formula/>
+        <hyperlink/>
+        <value>Description</value>
+      </column>
+    </row>
+    <row id="3">
+      <column id="A">
+        <formula/>
+        <hyperlink/>
+        <value>10</value>
+      </column>
+      <column id="B">
+        <formula>=Env!$C$3</formula>
+        <hyperlink/>
+        <value>1</value>
+      </column>
+      <column id="C">
+        <formula>=Env!$C$4</formula>
+        <hyperlink/>
+        <value>20</value>
+      </column>
+      <column id="D">
+        <formula>=Env!$C$5</formula>
+        <hyperlink/>
+        <value>generatedByScript</value>
+      </column>
+      <column id="E">
+        <formula/>
+        <hyperlink/>
+        <value>1</value>
+      </column>
+      <column id="F">
+        <formula/>
+        <hyperlink/>
+        <value>B2C_REN_APP</value>
+      </column>
+      <column id="G">
+        <formula/>
+        <hyperlink/>
+        <value>Движение заявки B2C REN</value>
+      </column>
+      <column id="H">
+        <formula/>
+        <hyperlink/>
+        <value>Группа задач по скорингу заявок и заключению кредитных договоров с банками в рамках B2C</value>
+      </column>
+    </row>
+  </sheet>
+  <sheet id="220079448" title="Scenario">
+    <row id="1">
+      <column id="A">
+        <formula/>
+        <hyperlink/>
+        <value>Таблица сценариев</value>
+      </column>
+      <column id="B">
+        <formula/>
+        <hyperlink/>
+        <value/>
+      </column>
+      <column id="C">
+        <formula/>
+        <hyperlink/>
+        <value/>
+      </column>
+    </row>
+    <row id="2">
+      <column id="A">
+        <formula/>
+        <hyperlink/>
+        <value>ID</value>
+      </column>
+      <column id="B">
+        <formula/>
+        <hyperlink/>
+        <value>TaskCommon_id</value>
+      </column>
+      <column id="C">
+        <formula/>
+        <hyperlink/>
+        <value>(TaskCommon.Caption)</value>
+      </column>
+    </row>
+    <row id="3">
+      <column id="A">
+        <formula/>
+        <hyperlink/>
+        <value>1</value>
+      </column>
+      <column id="B">
+        <formula>=TaskCommon!$A$3</formula>
+        <hyperlink/>
+        <value>10</value>
+      </column>
+      <column id="C">
+        <formula>=INDEX(TaskCommon!$G$3:$G; MATCH($B3;TaskCommon!$A$3:$A; 0))</formula>
+        <hyperlink/>
+        <value>Движение заявки B2C REN</value>
+      </column>
+    </row>
+  </sheet>
+</spreadsheet>
