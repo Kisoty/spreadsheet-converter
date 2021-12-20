@@ -45,7 +45,7 @@ final class SheetToXmlConverter
         }
     }
 
-    public function convertToXml(string $filename, string $spreadSheetId, array $ranges = null): void
+    public function convert(string $filename, string $spreadSheetId, array $ranges = null): void
     {
         $spreadSheet = $this->sheetsService->spreadsheets->get($spreadSheetId, [
             'includeGridData' => true,
