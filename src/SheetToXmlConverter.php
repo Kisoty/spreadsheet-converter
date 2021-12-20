@@ -2,14 +2,17 @@
 
 declare(strict_types=1);
 
-namespace DC\V3\Parser;
+namespace DC\V3\SheetConverter;
 
 use Google\Service\Sheets\CellData;
 use Google\Service\Sheets\CellFormat;
+use Google\Service\Sheets\Color;
 use Google\Service\Sheets\ExtendedValue;
 use Google\Service\Sheets\GridData;
+use Google\Service\Sheets\Padding;
 use Google\Service\Sheets\RowData;
 use Google\Service\Sheets\Sheet;
+use Google\Service\Sheets\TextFormat;
 use Google_Client;
 use Google_Service_Sheets;
 use SimpleXMLElement;
@@ -42,7 +45,7 @@ final class SheetToXmlConverter
         }
     }
 
-    public function convertToXml(string $filename, string $spreadSheetId, array $ranges = null)
+    public function convertToXml(string $filename, string $spreadSheetId, array $ranges = null): void
     {
         $spreadSheet = $this->sheetsService->spreadsheets->get($spreadSheetId, [
             'includeGridData' => true,
@@ -144,25 +147,112 @@ XML);
     private function setColumnValue(SimpleXMLElement $columnNode, ?ExtendedValue $effectiveValue): void
     {
         if ($effectiveValue === null) {
-            $columnNode->addChild('value', '');
+            $columnNode->addChild('value', '')->addAttribute('type', 'NULL');
         } elseif ($effectiveValue->getBoolValue() !== null) {
-            $columnNode->addChild('value', (string)$effectiveValue->getBoolValue());
+            $columnNode->addChild('value', (string)$effectiveValue->getBoolValue())
+                ->addAttribute('type', 'BOOLEAN');
         } elseif ($effectiveValue->getNumberValue() !== null) {
-            $columnNode->addChild('value', (string)$effectiveValue->getNumberValue());
+            $columnNode->addChild('value', (string)$effectiveValue->getNumberValue())
+                ->addAttribute('type', 'NUMBER');
         } elseif ($effectiveValue->getStringValue() !== null) {
-            $columnNode->addChild('value', (string)$effectiveValue->getStringValue());
+            $columnNode->addChild('value', (string)$effectiveValue->getStringValue())
+                ->addAttribute('type', 'STRING');
         } elseif ($effectiveValue->getErrorValue() !== null) {
-            $columnNode->addChild('value', $effectiveValue->getErrorValue()->getMessage());
+            $columnNode->addChild('value', $effectiveValue->getErrorValue()->getMessage())
+                ->addAttribute('type', 'STRING');
         } else {
-            $columnNode->addChild('value', '');
+            $columnNode->addChild('value', '')->addAttribute('type', 'NULL');
         }
     }
 
     private function setColumnStyle(SimpleXMLElement $columnNode, CellFormat $cellFormat): void
     {
         $styleNode = $columnNode->addChild('style');
-        $styleNode->addChild('bgc', );
 
+        if ($cellFormat->getBackgroundColor() !== null) {
+            $bgcNode = $styleNode->addChild('bgc');
+
+            $this->fillColorNode($bgcNode, $cellFormat->getBackgroundColor());
+        }
+
+        if ($cellFormat->getTextFormat() !== null) {
+            $textFormatNode = $styleNode->addChild('textFormat');
+
+            $this->fillTextFormatNode($textFormatNode, $cellFormat->getTextFormat());
+        }
+
+        if ($cellFormat->getPadding() !== null) {
+            $paddingNode = $styleNode->addChild('padding');
+
+            $this->fillPaddingNode($paddingNode, $cellFormat->getPadding());
+        }
+
+        $alignmentNode = $styleNode->addChild('alignment');
+        $alignmentNode->addChild('vertical', $cellFormat->getVerticalAlignment() ?? '');
+        $alignmentNode->addChild('horizontal', $cellFormat->getHorizontalAlignment() ?? '');
+
+        $styleNode->addChild('wrapStrategy', $cellFormat->getWrapStrategy() ?? '');
+    }
+
+    private function fillColorNode(SimpleXMLElement $node, Color $apiColor): void
+    {
+        if ($apiColor->getAlpha() !== null) {
+            $node->addChild('alpha', (string)$apiColor->getAlpha());
+        }
+        if ($apiColor->getBlue() !== null) {
+            $node->addChild('blue', (string)$apiColor->getBlue());
+        }
+        if ($apiColor->getGreen() !== null) {
+            $node->addChild('green', (string)$apiColor->getGreen());
+        }
+        if ($apiColor->getRed() !== null) {
+            $node->addChild('red', (string)$apiColor->getRed());
+        }
+    }
+
+    private function fillTextFormatNode(SimpleXMLElement $node, TextFormat $apiFormat): void
+    {
+        if ($apiFormat->getFontFamily() !== null) {
+            $node->addChild('fontFamily', $apiFormat->getFontFamily());
+        }
+        if ($apiFormat->getFontSize() !== null) {
+            $node->addChild('fontSize', (string)$apiFormat->getFontSize());
+        }
+
+        if ($apiFormat->getForegroundColor() !== null) {
+            $fontColorNode = $node->addChild('fontColor');
+
+            $this->fillColorNode($fontColorNode, $apiFormat->getForegroundColor());
+        }
+
+        if ($apiFormat->getItalic()) {
+            $node->addChild('italic');
+        }
+        if ($apiFormat->getBold()) {
+            $node->addChild('bold');
+        }
+        if ($apiFormat->getUnderline()) {
+            $node->addChild('underline');
+        }
+        if ($apiFormat->getStrikethrough()) {
+            $node->addChild('strikethrough');
+        }
+    }
+
+    private function fillPaddingNode(SimpleXMLElement $node, Padding $apiPadding): void
+    {
+        if ($apiPadding->getBottom() !== null) {
+            $node->addChild('bottom', (string)$apiPadding->getBottom());
+        }
+        if ($apiPadding->getTop() !== null) {
+            $node->addChild('top', (string)$apiPadding->getTop());
+        }
+        if ($apiPadding->getLeft() !== null) {
+            $node->addChild('left', (string)$apiPadding->getLeft());
+        }
+        if ($apiPadding->getRight() !== null) {
+            $node->addChild('right', (string)$apiPadding->getRight());
+        }
     }
 
     private function saveToFile(string $fileName): void

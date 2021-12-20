@@ -7,7 +7,7 @@
   },
   "autoload": {
     "psr-4": {
-      "DC\\V3\\Parser\\": "src/"
+      "DC\\V3\\SheetConverter\\": "src/"
     }
   },
   "require-dev": {
@@ -15,7 +15,7 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "DC\\V3\\Parser\\Tests\\": "tests/"
+      "DC\\V3\\SheetConverter\\Tests\\": "tests/"
     }
   }
 }
