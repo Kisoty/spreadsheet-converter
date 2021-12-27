@@ -25,10 +25,8 @@ final class SheetToXmlConverter
 
     private array $columnIndexes;
 
-    public function __construct(string $developerKey)
+    public function __construct(Client $client)
     {
-        $client = new Client();
-        $client->setDeveloperKey($developerKey);
         $this->sheetsService = new Sheets($client);
         $this->prepareSheetColumnIndexes();
     }
@@ -45,6 +43,9 @@ final class SheetToXmlConverter
         }
     }
 
+    /** todo change exception from base
+     * @throws \Exception
+     */
     public function convert(string $filename, string $spreadSheetId, array $ranges = null): void
     {
         $spreadSheet = $this->sheetsService->spreadsheets->get($spreadSheetId, [
@@ -77,6 +78,9 @@ final class SheetToXmlConverter
 XML);
     }
 
+    /** todo change exception from base
+     * @throws \Exception
+     */
     private function addSheet(Sheet $googleSheet): void
     {
         if ($googleSheet->getProperties()->getSheetType() !== 'GRID') {
