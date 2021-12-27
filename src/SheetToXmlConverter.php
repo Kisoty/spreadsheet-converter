@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace DC\V3\SheetConverter;
 
+use Google\Client;
+use Google\Service\Sheets;
 use Google\Service\Sheets\CellData;
 use Google\Service\Sheets\CellFormat;
 use Google\Service\Sheets\Color;
@@ -13,13 +15,11 @@ use Google\Service\Sheets\Padding;
 use Google\Service\Sheets\RowData;
 use Google\Service\Sheets\Sheet;
 use Google\Service\Sheets\TextFormat;
-use Google_Client;
-use Google_Service_Sheets;
 use SimpleXMLElement;
 
 final class SheetToXmlConverter
 {
-    private Google_Service_Sheets $sheetsService;
+    private Sheets $sheetsService;
 
     private SimpleXMLElement $xml;
 
@@ -27,9 +27,9 @@ final class SheetToXmlConverter
 
     public function __construct(string $developerKey)
     {
-        $client = new Google_Client();
+        $client = new Client();
         $client->setDeveloperKey($developerKey);
-        $this->sheetsService = new Google_Service_Sheets($client);
+        $this->sheetsService = new Sheets($client);
         $this->prepareSheetColumnIndexes();
     }
 
