@@ -42,7 +42,7 @@ final class XmlToSheetConverter
         $spreadSheetId = $this->createEmptySheet($spreadSheetName, $folderId);
 
         $sheetService = new Sheets($this->apiClient);
-
+//todo rm
 //        $spreadSheet = $sheetService->spreadsheets->get($sheetId, [
 //            'includeGridData' => true
 //        ]);
@@ -56,6 +56,7 @@ final class XmlToSheetConverter
             $sheetId = (int)$sheet->attributes()['id'];
 
             $sheetRequests = $this->appendUpdateCellsRequest($sheetRequests, $sheet->row, $sheetId);
+            $sheetRequests = $this->appendMergeCellsRequests($sheetRequests, $sheet->merge, $sheetId);
         }
 
         $batchUpdateRequest = new Sheets\BatchUpdateSpreadsheetRequest([
@@ -122,7 +123,7 @@ final class XmlToSheetConverter
             $startRowIndex = (int)current($rowNodes)['id'] - 1;
 
             foreach ($rowNodes as $rowNode) {
-                $startColumnIndex = array_search(current($rowNode->column)['id'], $this->columnIndexes, true);
+                $startColumnIndex = array_search(current($rowNode->column)['id'], $this->columnIndexes, true); //todo вот это говнище до цикла один раз из первого элемента вытащить надо
 
                 $rowData = [];
 
@@ -232,6 +233,26 @@ final class XmlToSheetConverter
         ];
 
         return $cellFormat;
+    }
+
+    private function appendMergeCellsRequests(array $sheetRequests, ?\SimpleXMLElement $merges, int $sheetId): array
+    {
+        foreach ($merges as $merge) {
+            $sheetRequests[] = [
+                'mergeCells' => [
+                    'range' => [
+                        'sheetId' => $sheetId,
+                        'startRowIndex' => (int)$merge->startRowIndex,
+                        'endRowIndex' => (int)$merge->endRowIndex,
+                        'startColumnIndex' => (int)$merge->startColumnIndex,
+                        'endColumnIndex' => (int)$merge->endColumnIndex,
+                    ],
+                    'mergeType' => 'MERGE_ALL'
+                ]
+            ];
+        }
+
+        return $sheetRequests;
     }
 
 

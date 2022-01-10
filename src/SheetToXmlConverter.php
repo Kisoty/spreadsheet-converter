@@ -95,6 +95,7 @@ XML);
         $sheetNode = $this->xml->addChild('sheet');
         $sheetNode->addAttribute('id', (string)$googleSheet->getProperties()->getSheetId());
         $sheetNode->addAttribute('title', $googleSheet->getProperties()->getTitle());
+        $this->addMergesToSheet($sheetNode, $googleSheet->getMerges());
 
         $rowNum = $this->getStartRowNum(current($googleSheet->getData()));
         $startColumnNum = $this->getStartColumnNum(current($googleSheet->getData()));
@@ -102,6 +103,21 @@ XML);
         foreach (current($googleSheet->getData())->getRowData() as $rowData) {
             $this->addRowToSheet($sheetNode, $rowData, $rowNum, $startColumnNum);
             $rowNum++;
+        }
+    }
+
+    /**
+     * @param Sheets\GridRange[] $merges
+     */
+    private function addMergesToSheet(SimpleXMLElement $sheetNode, array $merges): void
+    {
+        foreach ($merges as $merge) {
+            $mergeNode = $sheetNode->addChild('merge');
+
+            $mergeNode->addChild('startRowIndex', (string)$merge->getStartRowIndex());
+            $mergeNode->addChild('endRowIndex', (string)$merge->getEndRowIndex());
+            $mergeNode->addChild('startColumnIndex', (string)$merge->getStartColumnIndex());
+            $mergeNode->addChild('endColumnIndex', (string)$merge->getEndColumnIndex());
         }
     }
 
