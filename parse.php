@@ -27,9 +27,7 @@ function getClient(string $accCredentials): Client {
 
 $client = getClient(__DIR__ . '/googleTestAuth.json');
 
-//todo composer.json lib config, add exceptions, add example, files and folders structure
-
-//$sheetToXmlConverter = new SheetToXmlConverter($client);
+//todo composer.json lib config, add example, files and folders structure
 
 // my one
 // 12IbKSuInKseCaLQybjYDnnfBvEL5QVZ8Au0NJ0a9T7A
@@ -37,9 +35,10 @@ $client = getClient(__DIR__ . '/googleTestAuth.json');
 // ren scenario
 // 1NzZp5r6O2TBJwg5cIA2yLxcGoViduwVF1yrOw9b457Y
 
-
+//$sheetToXmlConverter = new SheetToXmlConverter($client);
 //$sheetToXmlConverter->convert('smth.xml', '1NzZp5r6O2TBJwg5cIA2yLxcGoViduwVF1yrOw9b457Y', [
 ////    'Notes!A1:A20',
+//    'Env!A1:E12',
 //    'TaskCommon!A1:H3',
 //    'StatusType!A1:H10',
 ////    'Scenario!B3:C3',

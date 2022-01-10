@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DC\V3\SheetConverter;
 
+use DC\V3\SheetConverter\Exceptions\SheetParseException;
 use Google\Client;
 use Google\Service\Sheets;
 use Google\Service\Sheets\CellData;
@@ -43,8 +44,8 @@ final class SheetToXmlConverter
         }
     }
 
-    /** todo change exception from base
-     * @throws \Exception
+    /**
+     * @throws SheetParseException
      */
     public function convert(string $filename, string $spreadSheetId, array $ranges = null): void
     {
@@ -78,17 +79,17 @@ final class SheetToXmlConverter
 XML);
     }
 
-    /** todo change exception from base
-     * @throws \Exception
+    /**
+     * @throws SheetParseException
      */
     private function addSheet(Sheet $googleSheet): void
     {
         if ($googleSheet->getProperties()->getSheetType() !== 'GRID') {
-            throw new \Exception('Only grid sheets supported.');
+            throw new SheetParseException('Only grid sheets supported.');
         }
 
         if (count($googleSheet->getData()) > 1) {
-            throw new \Exception('Only 1 range per sheet supported.');
+            throw new SheetParseException('Only 1 range per sheet supported.');
         }
 
         $sheetNode = $this->xml->addChild('sheet');
@@ -169,8 +170,12 @@ XML);
         }
     }
 
-    private function setColumnStyle(SimpleXMLElement $columnNode, CellFormat $cellFormat): void
+    private function setColumnStyle(SimpleXMLElement $columnNode, ?CellFormat $cellFormat): void
     {
+        if ($cellFormat === null) {
+            return;
+        }
+
         $styleNode = $columnNode->addChild('style');
 
         if ($cellFormat->getBackgroundColor() !== null) {
