@@ -7,7 +7,7 @@ use Google\Client;
 use Google\Service\Drive;
 use Google\Service\Sheets;
 
-require __DIR__ . '../vendor/autoload.php';
+require __DIR__ . './../vendor/autoload.php';
 
 // Use this function with passing google service account credentials or pass authorized google client object manually
 // Might be bad decision cuz of putting env var
