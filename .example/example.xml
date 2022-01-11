@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<spreadsheet id="" title="" autoRecalc="" locale="" timezone="">
+    <sheet id="" title="" frozenRowCount="" frozenColumnCount="">
+        <merges>
+            <startRowIndex></startRowIndex>
+            <endRowIndex></endRowIndex>
+            <startColumnIndex></startColumnIndex>
+            <endColumnIndex></endColumnIndex>
+        </merges>
+        <rowMetadata>
+            <row id="">
+                <hiddenByUser></hiddenByUser>
+                <pixelSize></pixelSize>
+            </row>
+        </rowMetadata>
+        <columnMetadata>
+            <column id="">
+                <hiddenByUser></hiddenByUser>
+                <pixelSize></pixelSize>
+            </column>
+        </columnMetadata>
+        <row id="">
+            <column id="">
+                <value></value>
+                <formula></formula>
+                <hyperlink></hyperlink>
+                <style>
+                    <bgc>
+                        <red></red>
+                        <green></green>
+                        <blue></blue>
+                        <alpha></alpha>
+                    </bgc>
+                    <textFormat>
+                        <fontFamily></fontFamily>
+                        <fontSize></fontSize>
+                        <fontColor>
+                            <red></red>
+                            <green></green>
+                            <blue></blue>
+                            <alpha></alpha>
+                        </fontColor>
+                        <bold>1</bold>
+                        <italic>1</italic>
+                        <strikethrough>1</strikethrough>
+                        <underline>1</underline>
+                    </textFormat>
+                    <padding>
+                        <bottom></bottom>
+                        <left></left>
+                        <right></right>
+                        <top></top>
+                    </padding>
+                    <alignment>
+                        <horizontal></horizontal>
+                        <vertical></vertical>
+                    </alignment>
+                    <wrapStrategy></wrapStrategy>
+                </style>
+            </column>
+        </row>
+    </sheet>
+</spreadsheet>

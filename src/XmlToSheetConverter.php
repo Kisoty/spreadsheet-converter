@@ -66,7 +66,8 @@ final class XmlToSheetConverter
             $sheetRequests = $this->appendUpdateCellsRequest($sheetRequests, $sheet->row, $sheetId);
             $sheetRequests = $this->appendMergeCellsRequests($sheetRequests, $sheet->merge, $sheetId);
             $sheetRequests = $this->appendUpdateRowMetadataRequest($sheetRequests, $sheet->rowMetadata->row, $sheetId);
-            $sheetRequests = $this->appendUpdateColumnMetadataRequest($sheetRequests, $sheet->columnMetadata->column, $sheetId);
+            $sheetRequests = $this->appendUpdateColumnMetadataRequest($sheetRequests,
+                $sheet->columnMetadata->column, $sheetId);
         }
 
         $batchUpdateRequest = new Sheets\BatchUpdateSpreadsheetRequest([
@@ -274,8 +275,11 @@ final class XmlToSheetConverter
         return $sheetRequests;
     }
 
-    private function appendUpdateRowMetadataRequest(array $sheetRequests, SimpleXMLElement $rowMedataNodes, int $sheetId): array
-    {
+    private function appendUpdateRowMetadataRequest(
+        array $sheetRequests,
+        SimpleXMLElement $rowMedataNodes,
+        int $sheetId
+    ): array {
         foreach ($rowMedataNodes as $rowMedataNode) {
             $startIndex = $rowMedataNode['id'] - 1;
             $endIndex = $startIndex + 1;
@@ -292,8 +296,11 @@ final class XmlToSheetConverter
         return $sheetRequests;
     }
 
-    private function appendUpdateColumnMetadataRequest(array $sheetRequests, SimpleXMLElement $columnMedataNodes, int $sheetId): array
-    {
+    private function appendUpdateColumnMetadataRequest(
+        array $sheetRequests,
+        SimpleXMLElement $columnMedataNodes,
+        int $sheetId
+    ): array {
         foreach ($columnMedataNodes as $columnMedataNode) {
             $startIndex = array_search((string)$columnMedataNode->attributes()['id'], $this->columnIndexes, true);
             $endIndex = $startIndex + 1;

@@ -77,7 +77,8 @@ final class SheetToXmlConverter
 <?xml version="1.0" encoding="UTF-8"?>
 <spreadsheet id="$spreadSheetId" title="$spreadSheetTitle" autoRecalc="$autoRecalc" locale="$locale" timezone="$timezone">
 </spreadsheet>
-XML);
+XML
+        );
     }
 
     /**
@@ -96,8 +97,10 @@ XML);
         $sheetNode = $xml->addChild('sheet');
         $sheetNode->addAttribute('id', (string)$googleSheet->getProperties()->getSheetId());
         $sheetNode->addAttribute('title', $googleSheet->getProperties()->getTitle());
-        $sheetNode->addAttribute('frozenRowCount', (string)(int)$googleSheet->getProperties()->getGridProperties()->frozenRowCount);
-        $sheetNode->addAttribute('frozenColumnCount', (string)(int)$googleSheet->getProperties()->getGridProperties()->frozenColumnCount);
+        $sheetNode->addAttribute('frozenRowCount',
+            (string)(int)$googleSheet->getProperties()->getGridProperties()->frozenRowCount);
+        $sheetNode->addAttribute('frozenColumnCount',
+            (string)(int)$googleSheet->getProperties()->getGridProperties()->frozenColumnCount);
 
         $this->addMergesToSheet($sheetNode, $googleSheet->getMerges());
 
@@ -311,9 +314,9 @@ XML);
     }
 
     private function addRowMetadataToSheet(
-        SimpleXMLElement $rowMetadataNode,
+        SimpleXMLElement           $rowMetadataNode,
         Sheets\DimensionProperties $rowMetadata,
-        int $rowNum
+        int                        $rowNum
     ): void {
         $rowNode = $rowMetadataNode->addChild('row');
         $rowNode->addAttribute('id', (string)$rowNum);
@@ -337,9 +340,9 @@ XML);
     }
 
     private function addColumnMetadataToSheet(
-        SimpleXMLElement $columnMetadataNode,
+        SimpleXMLElement           $columnMetadataNode,
         Sheets\DimensionProperties $columnMetadata,
-        int $columnNum
+        int                        $columnNum
     ): void {
         $columnNode = $columnMetadataNode->addChild('column');
         $columnNode->addAttribute('id', (string)$this->columnIndexes[$columnNum]);
