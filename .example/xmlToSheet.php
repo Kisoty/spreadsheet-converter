@@ -25,10 +25,10 @@ function getClient(string $accCredentials): Client {
     return $client;
 }
 
-$googleCredentials = 'path-to-json-with-credentials';
+$googleCredentials = __DIR__ . '/../googleTestAuth.json';
 $client = getClient($googleCredentials);
 
-$xmlString = file_get_contents('smth.xml');
+$xmlString = file_get_contents('../smth.xml');
 
 // Default name of created sheet before renaming it to title from xml
 // (sheet will be left with this name in case of mistake during parsing)

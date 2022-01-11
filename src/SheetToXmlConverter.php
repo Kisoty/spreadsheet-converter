@@ -175,10 +175,15 @@ XML
         if ($cellData->getUserEnteredValue() === null) {
             $columnNode->addChild('formula', '');
         } else {
-            $columnNode->addChild('formula', $cellData->getUserEnteredValue()->getFormulaValue());
+            $columnNode->addChild('formula',
+                htmlspecialchars($cellData->getUserEnteredValue()->getFormulaValue() ?? '', ENT_QUOTES));
         }
 
-        $columnNode->addChild('hyperlink', $cellData->getHyperlink() ?? '');
+        if ($cellData->getHyperlink() === null) {
+            $columnNode->addChild('hyperlink', '');
+        } else {
+            $columnNode->addChild('hyperlink', htmlspecialchars($cellData->getHyperlink(), ENT_QUOTES));
+        }
 
         $this->setColumnValue($columnNode, $cellData->getEffectiveValue());
         $this->setColumnStyle($columnNode, $cellData->getEffectiveFormat());

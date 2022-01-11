@@ -26,7 +26,7 @@ function getClient(string $accCredentials): Client {
 }
 
 
-$googleCredentials = 'path-to-json-with-credentials';
+$googleCredentials = __DIR__ . '/../googleTestAuth.json';
 $client = getClient($googleCredentials);
 
 // Example spreadsheet ID (ren scenario)
@@ -35,11 +35,16 @@ $spreadsheetId = '1NzZp5r6O2TBJwg5cIA2yLxcGoViduwVF1yrOw9b457Y';
 // Ranges of spreadsheet
 // Can be left null or not passed to function, but in this case ALL rows will be retrieved
 $ranges = [
-//    'Notes!A1:A20',
+    'Notes!A1:A23',
     'Env!A1:E13',
     'TaskCommon!A1:H3',
     'StatusType!A1:H10',
-//    'Scenario!B3:C3',
+    'StatusGeneral!A1:F157',
+    'Scenario!A3:C3',
+    'Swimline!A1:E3',
+    'Task!A1:I3',
+    'StatusHook!A1:L54',
+    'StepHook!A1:L98'
 ];
 
 // Filename with path to save parsed sheet
