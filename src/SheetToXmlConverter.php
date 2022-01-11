@@ -98,13 +98,12 @@ XML);
         $sheetNode->addAttribute('title', $googleSheet->getProperties()->getTitle());
         $this->addMergesToSheet($sheetNode, $googleSheet->getMerges());
 
-        $rowNum = $this->getStartRowNum(current($googleSheet->getData()));
+        $startRowNum = $this->getStartRowNum(current($googleSheet->getData()));
         $startColumnNum = $this->getStartColumnNum(current($googleSheet->getData()));
 
-        foreach (current($googleSheet->getData())->getRowData() as $rowData) {
-            $this->addRowToSheet($sheetNode, $rowData, $rowNum, $startColumnNum);
-            $rowNum++;
-        }
+        $this->addRowsMetadataToSheet($sheetNode, current($googleSheet->getData())->getRowMetadata(), $startRowNum);
+        $this->addColsMetadataToSheet($sheetNode, current($googleSheet->getData())->getColumnMetadata(), $startColumnNum);
+        $this->addRowsToSheet($sheetNode, current($googleSheet->getData())->getRowData(), $startRowNum, $startColumnNum);
     }
 
     /**
@@ -134,6 +133,19 @@ XML);
     private function getStartColumnNum(GridData $gridData): int
     {
         return $gridData->getStartColumn() ?? 0;
+    }
+
+    /**
+     * @param RowData[] $rows
+     */
+    private function addRowsToSheet(SimpleXMLElement $sheetNode, array $rows, int $startRowNum, int $startColumnNum): void
+    {
+        $rowNum = $startRowNum;
+
+        foreach ($rows as $rowData) {
+            $this->addRowToSheet($sheetNode, $rowData, $rowNum, $startColumnNum);
+            $rowNum++;
+        }
     }
 
     private function addRowToSheet(SimpleXMLElement $sheetNode, RowData $rowData, int $rowNum, int $startColumnNum): void
@@ -252,16 +264,16 @@ XML);
         }
 
         if ($apiFormat->getItalic()) {
-            $node->addChild('italic');
+            $node->addChild('italic', '1');
         }
         if ($apiFormat->getBold()) {
-            $node->addChild('bold');
+            $node->addChild('bold', '1');
         }
         if ($apiFormat->getUnderline()) {
-            $node->addChild('underline');
+            $node->addChild('underline', '1');
         }
         if ($apiFormat->getStrikethrough()) {
-            $node->addChild('strikethrough');
+            $node->addChild('strikethrough', '1');
         }
     }
 
@@ -279,6 +291,58 @@ XML);
         if ($apiPadding->getRight() !== null) {
             $node->addChild('right', (string)$apiPadding->getRight());
         }
+    }
+
+    /**
+     * @param Sheets\DimensionProperties[] $rowsMetadata
+     */
+    private function addRowsMetadataToSheet(SimpleXMLElement $sheetNode, array $rowsMetadata, int $startRowNum): void
+    {
+        $rowNum = $startRowNum;
+        $rowMetadataNode = $sheetNode->addChild('rowMetadata');
+
+        foreach ($rowsMetadata as $rowMetadata) {
+            $this->addRowMetadataToSheet($rowMetadataNode, $rowMetadata, $rowNum);
+            $rowNum++;
+        }
+    }
+
+    private function addRowMetadataToSheet(
+        SimpleXMLElement $rowMetadataNode,
+        Sheets\DimensionProperties $rowMetadata,
+        int $rowNum
+    ): void {
+        $rowNode = $rowMetadataNode->addChild('row');
+        $rowNode->addAttribute('id', (string)$rowNum);
+
+        $rowNode->addChild('hiddenByUser', (string)(int)$rowMetadata->getHiddenByUser());
+        $rowNode->addChild('pixelSize', (string)$rowMetadata->getPixelSize());
+    }
+
+    /**
+     * @param Sheets\DimensionProperties[] $colsMetadata
+     */
+    private function addColsMetadataToSheet(SimpleXMLElement $sheetNode, array $colsMetadata, int $startColumnNum): void
+    {
+        $colNum = $startColumnNum;
+        $columnMetadataNode = $sheetNode->addChild('columnMetadata');
+
+        foreach ($colsMetadata as $colMetadata) {
+            $this->addColumnMetadataToSheet($columnMetadataNode, $colMetadata, $colNum);
+            $colNum++;
+        }
+    }
+
+    private function addColumnMetadataToSheet(
+        SimpleXMLElement $columnMetadataNode,
+        Sheets\DimensionProperties $columnMetadata,
+        int $columnNum
+    ): void {
+        $columnNode = $columnMetadataNode->addChild('column');
+        $columnNode->addAttribute('id', (string)$this->columnIndexes[$columnNum]);
+
+        $columnNode->addChild('hiddenByUser', (string)(int)$columnMetadata->getHiddenByUser());
+        $columnNode->addChild('pixelSize', (string)$columnMetadata->getPixelSize());
     }
 
     private function saveToFile(SimpleXMLElement $xml, string $fileName): void

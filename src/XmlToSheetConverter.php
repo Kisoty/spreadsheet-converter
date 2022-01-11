@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace DC\V3\SheetConverter;
 
+use DC\V3\SheetConverter\Exceptions\XmlParseException;
 use Google\Client;
 use Google\Service\Drive;
 use Google\Service\Sheets;
+use SimpleXMLElement;
 
 final class XmlToSheetConverter
 {
@@ -37,18 +39,25 @@ final class XmlToSheetConverter
     }
 
     // TODO добавить валидацию переданного xml на основе xsd схемы до создания пустого файла на гугл диске
-    //todo spreadsheet attributes
-    public function convert(string $xmlFilename, string $spreadSheetName, string $folderId = null)
+    /**
+     * @var string $xml Xml string
+     * @throws XmlParseException
+     */
+    public function convert(string $xml, string $spreadsheetName, string $folderId = null): void
     {
-        $xml = new \SimpleXMLElement($xmlFilename);
+        try {
+            $xml = new SimpleXMLElement($xml);
+        } catch (\Exception $e) {
+            throw new XmlParseException();
+        }
 
-        $spreadSheetId = $this->createEmptySheet($spreadSheetName, $folderId);
+        $spreadsheetId = $this->createEmptySpreadsheet($spreadsheetName, $folderId);
 
         $sheetService = new Sheets($this->apiClient);
 
         $sheetRequests = [];
 
-        $sheetRequests = $this->appendUpdateSheetPropertiesRequest($sheetRequests, $xml);
+        $sheetRequests = $this->appendUpdateSpreadsheetPropertiesRequest($sheetRequests, $xml);
 
         foreach ($xml->sheet as $sheet) {
             $sheetRequests = $this->appendAddSheetRequest($sheetRequests, $sheet);
@@ -56,17 +65,21 @@ final class XmlToSheetConverter
 
             $sheetRequests = $this->appendUpdateCellsRequest($sheetRequests, $sheet->row, $sheetId);
             $sheetRequests = $this->appendMergeCellsRequests($sheetRequests, $sheet->merge, $sheetId);
+            $sheetRequests = $this->appendUpdateRowMetadataRequest($sheetRequests, $sheet->rowMetadata->row, $sheetId);
+            $sheetRequests = $this->appendUpdateColumnMetadataRequest($sheetRequests, $sheet->columnMetadata->column, $sheetId);
         }
 
         $batchUpdateRequest = new Sheets\BatchUpdateSpreadsheetRequest([
             'requests' => $sheetRequests
         ]);
 
-        $sheetService->spreadsheets->batchUpdate($spreadSheetId, $batchUpdateRequest);
+        $sheetService->spreadsheets->batchUpdate($spreadsheetId, $batchUpdateRequest);
     }
 
-    private function appendUpdateSheetPropertiesRequest(array $requestArray, \SimpleXMLElement $spreadSheetNode): array
-    {
+    private function appendUpdateSpreadsheetPropertiesRequest(
+        array $requestArray,
+        SimpleXMLElement $spreadSheetNode
+    ): array {
         $requestArray[] = [
             'updateSpreadsheetProperties' => [
                 'properties' => [
@@ -82,7 +95,7 @@ final class XmlToSheetConverter
         return $requestArray;
     }
 
-    private function appendAddSheetRequest(array $requestArray, ?\SimpleXMLElement $sheetNode): array
+    private function appendAddSheetRequest(array $requestArray, ?SimpleXMLElement $sheetNode): array
     {
         if ($sheetNode !== null) {
             $properties = [
@@ -109,7 +122,7 @@ final class XmlToSheetConverter
         return $requestArray;
     }
 
-    private function appendUpdateCellsRequest(array $requestArray, ?\SimpleXMLElement $rowNodes, int $sheetId): array
+    private function appendUpdateCellsRequest(array $requestArray, ?SimpleXMLElement $rowNodes, int $sheetId): array
     {
         $updateCellsRequest = [
             'updateCells' => [
@@ -158,7 +171,7 @@ final class XmlToSheetConverter
         return $requestArray;
     }
 
-    private function parseCellValue(\SimpleXMLElement $cellNode): ?array
+    private function parseCellValue(SimpleXMLElement $cellNode): ?array
     {
         if ($cellNode->value[0] === null) {
             return null;
@@ -182,7 +195,7 @@ final class XmlToSheetConverter
         }
     }
 
-    private function parseCellFormat(\SimpleXMLElement $cellNode): ?array
+    private function parseCellFormat(SimpleXMLElement $cellNode): ?array
     {
         $cellFormat = [];
 
@@ -209,7 +222,11 @@ final class XmlToSheetConverter
                 'red' => (float)$textFormatNode->fontColor[0]->red,
                 'green' => (float)$textFormatNode->fontColor[0]->green,
                 'blue' => (float)$textFormatNode->fontColor[0]->blue,
-            ]
+            ],
+            'italic' => !empty($textFormatNode->italic),
+            'bold' => !empty($textFormatNode->bold),
+            'underline' => !empty($textFormatNode->underline),
+            'strikethrough' => !empty($textFormatNode->strikethrough),
         ];
 
         $alignmentNode = $styleNode->alignment[0];
@@ -233,7 +250,7 @@ final class XmlToSheetConverter
         return $cellFormat;
     }
 
-    private function appendMergeCellsRequests(array $sheetRequests, ?\SimpleXMLElement $merges, int $sheetId): array
+    private function appendMergeCellsRequests(array $sheetRequests, ?SimpleXMLElement $merges, int $sheetId): array
     {
         foreach ($merges as $merge) {
             $sheetRequests[] = [
@@ -253,6 +270,66 @@ final class XmlToSheetConverter
         return $sheetRequests;
     }
 
+    private function appendUpdateRowMetadataRequest(array $sheetRequests, SimpleXMLElement $rowMedataNodes, int $sheetId): array
+    {
+        foreach ($rowMedataNodes as $rowMedataNode) {
+            $startIndex = $rowMedataNode['id'] - 1;
+            $endIndex = $startIndex + 1;
+            $sheetRequests[] = $this->buildUpdateDimensionPropertiesRequest(
+                (int)$rowMedataNode->pixelSize,
+                (bool)(int)$rowMedataNode->hiddenByUser,
+                $sheetId,
+                'ROWS',
+                $startIndex,
+                $endIndex
+            );
+        }
+
+        return $sheetRequests;
+    }
+
+    private function appendUpdateColumnMetadataRequest(array $sheetRequests, SimpleXMLElement $columnMedataNodes, int $sheetId): array
+    {
+        foreach ($columnMedataNodes as $columnMedataNode) {
+            $startIndex = array_search((string)$columnMedataNode->attributes()['id'], $this->columnIndexes, true);
+            $endIndex = $startIndex + 1;
+            $sheetRequests[] = $this->buildUpdateDimensionPropertiesRequest(
+                (int)$columnMedataNode->pixelSize,
+                (bool)(int)$columnMedataNode->hiddenByUser,
+                $sheetId,
+                'COLUMNS',
+                $startIndex,
+                $endIndex
+            );
+        }
+
+        return $sheetRequests;
+    }
+
+    private function buildUpdateDimensionPropertiesRequest(
+        int $pixelSize,
+        bool $hiddenByUser,
+        int $sheetId,
+        string $dimension,
+        int $startIndex,
+        int $endIndex
+    ): array {
+        return [
+            'updateDimensionProperties' => [
+                'fields' => 'pixelSize, hiddenByUser',
+                'properties' => [
+                    'pixelSize' => $pixelSize,
+                    'hiddenByUser' => $hiddenByUser,
+                ],
+                'range' => [
+                    'sheetId' => $sheetId,
+                    'dimension' => $dimension,
+                    'startIndex' => $startIndex,
+                    'endIndex' => $endIndex
+                ]
+            ]
+        ];
+    }
 
     /**
      * Creates new spreadsheet and returns its ID
@@ -260,7 +337,7 @@ final class XmlToSheetConverter
      * @param ?string $folderId
      * @return string New Spreadsheet ID
      */
-    private function createEmptySheet(string $spreadSheetName, string $folderId = null): string
+    private function createEmptySpreadsheet(string $spreadSheetName, string $folderId = null): string
     {
         $drive = new Drive($this->apiClient);
         $newDriveFile = new Drive\DriveFile();
