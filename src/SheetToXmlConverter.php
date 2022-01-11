@@ -22,8 +22,9 @@ final class SheetToXmlConverter
 {
     private Sheets $sheetsService;
 
-    private SimpleXMLElement $xml;
-
+    /**
+     * @var array Соответствие int индексов буквенным в google sheets
+     */
     private array $columnIndexes;
 
     public function __construct(Client $client)
@@ -54,7 +55,7 @@ final class SheetToXmlConverter
             'ranges' => $ranges
         ]);
 
-        $this->setXmlBase(
+        $xml = $this->createBaseXml(
             $spreadSheet->getSpreadsheetId(),
             $spreadSheet->getProperties()->getTitle(),
             $spreadSheet->getProperties()->getAutoRecalc(),
@@ -63,16 +64,16 @@ final class SheetToXmlConverter
         );
 
         foreach ($spreadSheet->getSheets() as $sheet) {
-            $this->addSheet($sheet);
+            $this->addSheet($xml, $sheet);
         }
 
-        $this->saveToFile($filename);
+        $this->saveToFile($xml, $filename);
     }
 
-    private function setXmlBase(string $spreadSheetId, string $spreadSheetTitle,
-                                string $autoRecalc, string $locale, string $timezone): void
+    private function createBaseXml(string $spreadSheetId, string $spreadSheetTitle,
+                                   string $autoRecalc, string $locale, string $timezone): SimpleXMLElement
     {
-        $this->xml = new SimpleXMLElement(<<<XML
+        return new SimpleXMLElement(<<<XML
 <?xml version="1.0" encoding="UTF-8"?>
 <spreadsheet id="$spreadSheetId" title="$spreadSheetTitle" autoRecalc="$autoRecalc" locale="$locale" timezone="$timezone">
 </spreadsheet>
@@ -82,7 +83,7 @@ XML);
     /**
      * @throws SheetParseException
      */
-    private function addSheet(Sheet $googleSheet): void
+    private function addSheet(SimpleXMLElement $xml, Sheet $googleSheet): void
     {
         if ($googleSheet->getProperties()->getSheetType() !== 'GRID') {
             throw new SheetParseException('Only grid sheets supported.');
@@ -92,7 +93,7 @@ XML);
             throw new SheetParseException('Only 1 range per sheet supported.');
         }
 
-        $sheetNode = $this->xml->addChild('sheet');
+        $sheetNode = $xml->addChild('sheet');
         $sheetNode->addAttribute('id', (string)$googleSheet->getProperties()->getSheetId());
         $sheetNode->addAttribute('title', $googleSheet->getProperties()->getTitle());
         $this->addMergesToSheet($sheetNode, $googleSheet->getMerges());
@@ -280,12 +281,12 @@ XML);
         }
     }
 
-    private function saveToFile(string $fileName): void
+    private function saveToFile(SimpleXMLElement $xml, string $fileName): void
     {
         $dom = new \DOMDocument();
         $dom->preserveWhiteSpace = false;
         $dom->formatOutput = true;
-        $dom->loadXML($this->xml->asXML());
+        $dom->loadXML($xml->asXML());
         $dom->saveXML();
         $dom->save($fileName);
     }

@@ -12,6 +12,9 @@ final class XmlToSheetConverter
 {
     private Client $apiClient;
 
+    /**
+     * @var array Соответствие int индексов буквенным в google sheets
+     */
     private array $columnIndexes;
 
     public function __construct(Client $client)
@@ -42,10 +45,6 @@ final class XmlToSheetConverter
         $spreadSheetId = $this->createEmptySheet($spreadSheetName, $folderId);
 
         $sheetService = new Sheets($this->apiClient);
-//todo rm
-//        $spreadSheet = $sheetService->spreadsheets->get($sheetId, [
-//            'includeGridData' => true
-//        ]);
 
         $sheetRequests = [];
 
@@ -121,10 +120,9 @@ final class XmlToSheetConverter
 
         if ($rowNodes !== null) {
             $startRowIndex = (int)current($rowNodes)['id'] - 1;
+            $startColumnIndex = array_search(current($rowNodes[0]->column)['id'], $this->columnIndexes, true);
 
             foreach ($rowNodes as $rowNode) {
-                $startColumnIndex = array_search(current($rowNode->column)['id'], $this->columnIndexes, true); //todo вот это говнище до цикла один раз из первого элемента вытащить надо
-
                 $rowData = [];
 
                 foreach ($rowNode->column as $cellNode) {
