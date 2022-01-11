@@ -100,14 +100,18 @@ final class XmlToSheetConverter
         if ($sheetNode !== null) {
             $properties = [
                 'title' => (string)$sheetNode->attributes()['title'],
-                'sheetId' => (int)$sheetNode->attributes()['id']
+                'sheetId' => (int)$sheetNode->attributes()['id'],
+                'gridProperties' => [
+                    'frozenRowCount' => (int)$sheetNode->attributes()['frozenRowCount'],
+                    'frozenColumnCount' => (int)$sheetNode->attributes()['frozenColumnCount'],
+                ]
             ];
 
             if ((int)$sheetNode->attributes()['id'] === 0) {
                 $requestArray[] = [
                     'updateSheetProperties' => [
                         'properties' => $properties,
-                        'fields' => 'title'
+                        'fields' => 'title,gridProperties.frozenRowCount,gridProperties.frozenColumnCount'
                     ]
                 ];
             } else {

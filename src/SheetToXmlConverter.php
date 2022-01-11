@@ -96,6 +96,9 @@ XML);
         $sheetNode = $xml->addChild('sheet');
         $sheetNode->addAttribute('id', (string)$googleSheet->getProperties()->getSheetId());
         $sheetNode->addAttribute('title', $googleSheet->getProperties()->getTitle());
+        $sheetNode->addAttribute('frozenRowCount', (string)(int)$googleSheet->getProperties()->getGridProperties()->frozenRowCount);
+        $sheetNode->addAttribute('frozenColumnCount', (string)(int)$googleSheet->getProperties()->getGridProperties()->frozenColumnCount);
+
         $this->addMergesToSheet($sheetNode, $googleSheet->getMerges());
 
         $startRowNum = $this->getStartRowNum(current($googleSheet->getData()));
