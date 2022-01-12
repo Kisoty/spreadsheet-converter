@@ -25,7 +25,7 @@ function getClient(string $accCredentials): Client {
     return $client;
 }
 
-$googleCredentials = __DIR__ . '/../googleTestAuth.json';
+$googleCredentials = 'path-to-json-with-credentials';
 $client = getClient($googleCredentials);
 
 $xmlString = file_get_contents('../smth.xml');
@@ -35,7 +35,7 @@ $xmlString = file_get_contents('../smth.xml');
 $defaultSpreadsheetName = 'Create Test ' . (new DateTime())->format('H:i:s d.m.Y');
 
 // ID of folder to save sheet to
-$googleDriveFolderId = '1GDaXbZ5d6qIhfzvB7yn74QETJ-A_suPN';
+$googleDriveFolderId = 'google-drive-folder';
 
 $xmlToSheetConverter = new XmlToSheetConverter($client);
 $xmlToSheetConverter->convert($xmlString, $defaultSpreadsheetName, $googleDriveFolderId);

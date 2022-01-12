@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace DC\V3\SheetConverter;
 
 use DC\V3\SheetConverter\Exceptions\SheetParseException;
+use DC\V3\SheetConverter\Exceptions\XmlSaveException;
 use Google\Client;
 use Google\Service\Sheets;
 use Google\Service\Sheets\CellData;
@@ -48,7 +49,7 @@ final class SheetToXmlConverter
     /**
      * @throws SheetParseException
      */
-    public function convert(string $filename, string $spreadSheetId, array $ranges = null): void
+    public function convert(string $spreadSheetId, array $ranges = null): string
     {
         $spreadSheet = $this->sheetsService->spreadsheets->get($spreadSheetId, [
             'includeGridData' => true,
@@ -67,7 +68,7 @@ final class SheetToXmlConverter
             $this->addSheet($xml, $sheet);
         }
 
-        $this->saveToFile($xml, $filename);
+        return $this->normalizeXml($xml);
     }
 
     private function createBaseXml(string $spreadSheetId, string $spreadSheetTitle,
@@ -356,13 +357,29 @@ XML
         $columnNode->addChild('pixelSize', (string)$columnMetadata->getPixelSize());
     }
 
-    private function saveToFile(SimpleXMLElement $xml, string $fileName): void
+    /**
+     * @return string|false XML string or false if error occurred
+     */
+    private function normalizeXml(SimpleXMLElement $xml)
     {
         $dom = new \DOMDocument();
         $dom->preserveWhiteSpace = false;
         $dom->formatOutput = true;
         $dom->loadXML($xml->asXML());
-        $dom->saveXML();
-        $dom->save($fileName);
+
+        return $dom->saveXML();
+    }
+
+    /**
+     * @throws XmlSaveException
+     */
+    public static function saveToFile(string $xmlString, string $fileName): void
+    {
+        $dom = new \DOMDocument();
+        $dom->loadXML($xmlString);
+
+        if ($dom->save($fileName) === false) {
+            throw new XmlSaveException();
+        }
     }
 }

@@ -26,7 +26,7 @@ function getClient(string $accCredentials): Client {
 }
 
 
-$googleCredentials = __DIR__ . '/../googleTestAuth.json';
+$googleCredentials = 'path-to-json-with-credentials';
 $client = getClient($googleCredentials);
 
 // Example spreadsheet ID (ren scenario)
@@ -47,8 +47,10 @@ $ranges = [
     'StepHook!A1:L98'
 ];
 
+$sheetToXmlConverter = new SheetToXmlConverter($client);
+$xmlString = $sheetToXmlConverter->convert($spreadsheetId, $ranges);
+
 // Filename with path to save parsed sheet
 $filename = '../smth.xml';
 
-$sheetToXmlConverter = new SheetToXmlConverter($client);
-$sheetToXmlConverter->convert($filename, $spreadsheetId, $ranges);
+$sheetToXmlConverter::saveToFile($xmlString, $filename);
